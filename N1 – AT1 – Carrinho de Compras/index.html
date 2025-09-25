@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Carrinho de Compras - Protótipo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+    <h1>Carrinho de Compras - Protótipo</h1>
+
+    <!-- Área de Login -->
+    <section id="login-section" class="card">
+      <h2>Login</h2>
+      <div class="form-row">
+        <label for="username">Usuário</label>
+        <input id="username" type="text" placeholder="Digite o usuário">
+      </div>
+      <div class="form-row">
+        <label for="password">Senha</label>
+        <input id="password" type="password" placeholder="Digite a senha">
+      </div>
+      <div class="actions">
+        <button id="btn-login">Entrar</button>
+        <button id="btn-logout" class="hidden">Sair</button>
+      </div>
+      <p id="login-msg" class="message"></p>
+    </section>
+
+    <!-- Área do Sistema: apenas visível após login -->
+    <section id="app-section" class="hidden">
+      <div class="topbar">
+        <div>
+          <label for="search-input">Buscar produto:</label>
+          <input id="search-input" placeholder="Nome ou código">
+          <button id="btn-search">Buscar</button>
+          <button id="btn-show-all">Mostrar todos</button>
+        </div>
+        <div id="welcome">Bem-vindo(a) — <span id="user-name"></span></div>
+      </div>
+
+      <div class="grid">
+        <!-- Lista de Produtos Disponíveis -->
+        <div class="card">
+          <h3>Produtos</h3>
+          <ul id="products-list"></ul>
+        </div>
+
+        <!-- Carrinho -->
+        <div class="card">
+          <h3>Carrinho</h3>
+          <ul id="cart-list"></ul>
+          <p id="cart-total">Total: R$ 0,00</p>
+          <div class="actions">
+            <button id="btn-finalize">Finalizar Compra</button>
+            <button id="btn-clear">Limpar Carrinho</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumo / Mensagens -->
+      <section id="summary" class="card hidden">
+        <h3>Resumo do Pedido</h3>
+        <div id="order-summary"></div>
+        <button id="btn-close-summary">Fechar Resumo</button>
+      </section>
+
+      <p id="app-msg" class="message"></p>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
