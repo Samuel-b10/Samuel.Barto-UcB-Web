@@ -1,4 +1,8 @@
-// Variáveis globais (array de produtos e carrinho)
+// =======================================================
+//                   VARIÁVEIS GLOBAIS
+// =======================================================
+
+// Lista de produtos disponíveis
 const PRODUCTS = [
   { code: 'P001', name: 'Teclado Mecânico', price: 249.90 },
   { code: 'P002', name: 'Mouse Gamer', price: 99.90 },
@@ -7,19 +11,23 @@ const PRODUCTS = [
   { code: 'P005', name: 'Headset', price: 199.99 }
 ];
 
-// carrinho será um array de objetos: { code, name, price, qty }
-let cart = []; // variável global (mutável)
-var loggedUser = null; // demonstrando var (escopo funcional/glob.)
+// Carrinho de compras, começa vazio
+let cart = [];
 
-// Usuários simples para autenticação (apenas exemplo)
+// Usuário logado atualmente
+var loggedUser = null; // 'var' demonstra escopo global/função
+
+// Usuários para login (apenas exemplo)
 const USERS = [
   { username: 'aluno', password: '1234', displayName: 'Aluno' },
   { username: 'admin', password: 'admin', displayName: 'Administrador' }
 ];
 
-// --- Funções de inicialização e render ---
+// =======================================================
+//             INICIALIZAÇÃO E EVENTOS
+// =======================================================
 function init() {
-  // Vincular eventos
+  // ----- Vincula botões e campos aos eventos -----
   document.getElementById('btn-login').addEventListener('click', login);
   document.getElementById('btn-logout').addEventListener('click', logout);
   document.getElementById('btn-search').addEventListener('click', handleSearch);
@@ -27,44 +35,58 @@ function init() {
   document.getElementById('btn-finalize').addEventListener('click', finalizePurchase);
   document.getElementById('btn-clear').addEventListener('click', clearCart);
   document.getElementById('btn-close-summary').addEventListener('click', () => toggleSummary(false));
-  document.getElementById('search-input').addEventListener('keyup', (e)=>{ if(e.key === 'Enter') handleSearch() });
 
+  // Evento "Enter" para busca
+  document.getElementById('search-input').addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') handleSearch();
+  });
+
+  // Renderiza produtos e carrinho na tela
   renderProducts();
   renderCart();
 }
 
-// --- Login / Logout ---
+// O init() será chamado quando a página carregar
+window.addEventListener('DOMContentLoaded', init);
+
+// =======================================================
+//                   LOGIN / LOGOUT
+// =======================================================
 function login() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
   const msgEl = document.getElementById('login-msg');
 
-  // validação simples
+  // Validação: campos não podem estar vazios
   if (!username || !password) {
     msgEl.textContent = 'Preencha usuário e senha.';
     return;
   }
 
+  // Procura usuário na lista USERS
   const user = USERS.find(u => u.username === username && u.password === password);
+
   if (user) {
-    loggedUser = user;
+    loggedUser = user;  // salva usuário logado
     msgEl.textContent = '';
-    afterLogin();
+    afterLogin();       // atualiza interface
   } else {
     msgEl.textContent = 'Usuário ou senha inválidos.';
   }
 }
 
+// Ajusta a interface após login
 function afterLogin() {
-  document.getElementById('login-section').classList.add('hidden');
-  document.getElementById('app-section').classList.remove('hidden');
-  document.getElementById('btn-logout').classList.remove('hidden');
-  document.getElementById('user-name').textContent = loggedUser.displayName;
-  document.getElementById('user-name').title = loggedUser.username;
-  renderProducts();
-  renderCart();
+  document.getElementById('login-section').classList.add('hidden'); // esconde login
+  document.getElementById('app-section').classList.remove('hidden'); // mostra app
+  document.getElementById('btn-logout').classList.remove('hidden'); // mostra botão logout
+  document.getElementById('user-name').textContent = loggedUser.displayName; // mostra nome
+  document.getElementById('user-name').title = loggedUser.username;         // mostra username
+  renderProducts(); // lista produtos
+  renderCart();     // atualiza carrinho
 }
 
+// Logout: limpa usuário e volta para tela de login
 function logout() {
   loggedUser = null;
   document.getElementById('login-section').classList.remove('hidden');
@@ -73,12 +95,16 @@ function logout() {
   document.getElementById('login-msg').textContent = 'Desconectado.';
 }
 
-// --- Produtos & Busca ---
-function renderProducts(products = PRODUCTS) {
-  // somente permitir render se estiver logado
-  const prodList = document.getElementById('products-list');
-  prodList.innerHTML = '';
+// =======================================================
+//             PRODUTOS E BUSCA
+// =======================================================
 
+// Renderiza a lista de produtos na tela
+function renderProducts(products = PRODUCTS) {
+  const prodList = document.getElementById('products-list');
+  prodList.innerHTML = ''; // limpa lista antes de renderizar
+
+  // Cria elementos <li> para cada produto
   products.forEach(p => {
     const li = document.createElement('li');
     li.innerHTML = `
@@ -94,23 +120,29 @@ function renderProducts(products = PRODUCTS) {
   });
 }
 
+// Busca produtos por nome ou código
 function handleSearch() {
   const term = document.getElementById('search-input').value.trim().toLowerCase();
   const msgEl = document.getElementById('app-msg');
   msgEl.textContent = '';
+
   if (!term) {
-    renderProducts();
+    renderProducts(); // se campo vazio, mostra todos
     return;
   }
 
+  // Filtra produtos
   const results = PRODUCTS.filter(p => p.name.toLowerCase().includes(term) || p.code.toLowerCase() === term);
-  if (results.length === 0) {
-    msgEl.textContent = 'Nenhum produto encontrado.';
-  }
+
+  if (results.length === 0) msgEl.textContent = 'Nenhum produto encontrado.';
   renderProducts(results);
 }
 
-// --- Carrinho ---
+// =======================================================
+//                     CARRINHO
+// =======================================================
+
+// Adiciona produto ao carrinho
 function addToCart(code) {
   if (!loggedUser) { showAppMessage('Faça login para adicionar produtos.'); return; }
 
@@ -118,23 +150,20 @@ function addToCart(code) {
   if (!prod) { showAppMessage('Produto não encontrado.'); return; }
 
   const existing = cart.find(i => i.code === code);
-  if (existing) {
-    existing.qty += 1; // variável dentro do objeto
-  } else {
-    // uso de let para variável local
-    let item = { code: prod.code, name: prod.name, price: prod.price, qty: 1 };
-    cart.push(item);
-  }
-  renderCart();
+  if (existing) existing.qty += 1; // incrementa se já existe
+  else cart.push({ code: prod.code, name: prod.name, price: prod.price, qty: 1 });
+
+  renderCart(); // atualiza carrinho  
   showAppMessage(`${prod.name} adicionado ao carrinho.`);
 }
 
+// Remove produto do carrinho
 function removeFromCart(code) {
-  // remove item completamente do carrinho
   cart = cart.filter(i => i.code !== code);
   renderCart();
 }
 
+// Renderiza carrinho na tela
 function renderCart() {
   const cartList = document.getElementById('cart-list');
   cartList.innerHTML = '';
@@ -159,14 +188,15 @@ function renderCart() {
     cartList.appendChild(li);
   });
 
+  // Atualiza total na interface
   document.getElementById('cart-total').textContent = `Total: R$ ${total.toFixed(2)}`;
 }
 
+// Aumenta ou diminui quantidade
 function increaseQty(code) {
   const item = cart.find(i => i.code === code);
   if (item) { item.qty += 1; renderCart(); }
 }
-
 function decreaseQty(code) {
   const item = cart.find(i => i.code === code);
   if (item) {
@@ -176,20 +206,26 @@ function decreaseQty(code) {
   }
 }
 
+// Limpa todo o carrinho
 function clearCart() {
   cart = [];
   renderCart();
 }
 
-// --- Finalizar Compra ---
+// =======================================================
+//                  FINALIZAR COMPRA
+// =======================================================
 function finalizePurchase() {
   if (!loggedUser) { showAppMessage('Faça login para finalizar a compra.'); return; }
   if (cart.length === 0) { showAppMessage('Carrinho vazio. Adicione produtos antes de finalizar.'); return; }
 
+  // Calcula total da compra
   const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+  // Seleciona elemento HTML de resumo
   const summaryEl = document.getElementById('order-summary');
 
-  // construir resumo (DOM)
+  // Monta HTML do resumo
   let html = `<p><strong>Cliente:</strong> ${loggedUser.displayName} (${loggedUser.username})</p>`;
   html += '<ul>';
   cart.forEach(i => {
@@ -198,25 +234,25 @@ function finalizePurchase() {
   html += '</ul>';
   html += `<p><strong>Total:</strong> R$ ${total.toFixed(2)}</p>`;
 
-  summaryEl.innerHTML = html;
-  toggleSummary(true);
-
-  // opcional: limpar o carrinho após finalizar
-  cart = [];
-  renderCart();
+  summaryEl.innerHTML = html; // exibe resumo
+  toggleSummary(true);         // mostra seção de resumo
+s
+  cart = [];                   // limpa carrinho
+  renderCart();                // atualiza interface
 }
 
+// Mostra ou esconde resumo
 function toggleSummary(show) {
   const el = document.getElementById('summary');
-  if (show) el.classList.remove('hidden'); else el.classList.add('hidden');
+  if (show) el.classList.remove('hidden'); 
+  else el.classList.add('hidden');
 }
 
-// --- Utilitários ---
+// =======================================================
+//                    UTILITÁRIOS
+// =======================================================
 function showAppMessage(text) {
   const el = document.getElementById('app-msg');
-  el.textContent = text;
-  setTimeout(()=>{ el.textContent = '' }, 3000);
+  el.textContent = text;                   // mostra mensagem
+  setTimeout(()=>{ el.textContent = '' }, 3000); // some após 3s
 }
-
-// Inicialização quando a página carregar
-window.addEventListener('DOMContentLoaded', init);
